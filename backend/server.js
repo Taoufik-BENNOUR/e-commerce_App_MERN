@@ -5,6 +5,7 @@ const dotenv = require("dotenv").config({path:"./config/.env"})
 
 const productsRoute = require("./routes/product")
 
+
 const app = express()
 connectDB()
 app.use(express.json())
