@@ -4,6 +4,7 @@ const APIFeatures = require("../utils/apiFeatures")
 //Add new product
 exports.newProduct = async (req,res,next)=>{
 try {
+    req.body.userId = req.user.id
     const newProduct = await new Product(req.body)
 
     await newProduct.save()

@@ -70,7 +70,10 @@ reviews:[
             required:true
         }
     }
-],
+],userId:{
+    type:mongoose.Schema.ObjectId,
+    ref:"User",
+}
 },{timestamps:true})
 
 module.exports = mongoose.model("Product",productSchema)
