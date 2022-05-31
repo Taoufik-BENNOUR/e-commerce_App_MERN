@@ -1,6 +1,7 @@
 
 const sendToken = (user,statusCode,res) => {
     
+    const {password,...others} = user._doc
     const token = user.getJwtToken();
 
     const options = {
@@ -8,7 +9,7 @@ const sendToken = (user,statusCode,res) => {
         httpOnly: true
 
     }
-    res.status(statusCode).cookie("token",token,options).json({user,token})
+    res.status(statusCode).cookie("token",token,options).json({others,token})
 }
 
 module.exports = sendToken
