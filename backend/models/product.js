@@ -49,14 +49,18 @@ seller:{
 },stock:{
     type:Number,
     required:[true,"Please enter product stock"],
-    maxlength:[5,"Product canot exceed 5 numbers"]
+    maxlength:[5,"Product cannot exceed 5 numbers"]
 },
 numOfreviews:{
     type:Number,
     default:0
 },
 reviews:[
-    {
+    {   
+        userId:{
+        type:mongoose.Schema.ObjectId,
+        ref:"User",
+        },
         name:{
             type:String,
             required:true
