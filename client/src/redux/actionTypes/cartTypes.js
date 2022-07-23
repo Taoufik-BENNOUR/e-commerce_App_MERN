@@ -1,0 +1,7 @@
+export const ADD_TO_CART = "ADD_TO_CART"
+export const ADD_TO_CART_SUCCESS = "ADD_TO_CART_SUCCESS"
+export const ADD_TO_CART_FAILED = "ADD_TO_CART_FAILED"
+
+export const REMOVE_CART_ITEM = "REMOVE_CART_ITEM"
+
+export const SAVE_SHIPPNG = "SAVE_SHIPPNG"

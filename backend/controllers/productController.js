@@ -11,19 +11,19 @@ try {
     res.status(200).json({success:true,newProduct})
 
 } catch (error) {
-    res.status(400).json({errorMsg:[{msg:"Failed to add product"}]})
+    res.status(400).json({errorMsg:[{msg:"Failed to add product",error}]})
 }
 } 
 //Fetch all products
 exports.getProducts = async (req,res,next)=>{
 
-    const resultPerPage = 5 ;
+    const resultPerPage = 6 ;
     try {
-        const productCount = await Product.countDocuments()
+        const productsCount = await Product.countDocuments()
         const apiFeatures = new APIFeatures(Product.find(),req.query).search().filter().pagination(resultPerPage)
 
         const products = await apiFeatures.query
-        res.status(200).json({success:true,count:products.length,productCount,products})
+        res.status(200).json({message:"Fetch all products",count:products.length,productsCount,products,resultPerPage})
 
     } catch (error) {
         res.status(400).json(error)
@@ -60,7 +60,7 @@ exports.updateProduct = async (req,res)=>{
 exports.deleteProduct = async (req,res)=>{
     try {
         await Product.findByIdAndDelete(req.params.id)
-        res.status(200).json("Product deleted successfully")
+        res.status(200).json({message:"Product deleted successfully"})
     } catch (error) {
         
         res.status(400).json({errors:[{errorMsg:error}]})
@@ -127,4 +127,12 @@ exports.deleteProductReview = async (req,res) =>{
     }
 }
 
+exports.getAdminProducts = async(req,res)=>{
+    try {
+        const products = await Product.find()
+        res.status(200).json(products)
+    } catch (error) {
+        res.status(400).json(error)
+    }
+}
 

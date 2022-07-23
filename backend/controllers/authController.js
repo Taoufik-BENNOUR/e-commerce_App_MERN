@@ -3,14 +3,26 @@ const bcrypt = require("bcrypt")
 const sendToken = require("../utils/jwtToken")
 const sendEmail = require("../utils/sendEmail")
 const crypto = require("crypto")
-
+const cloudinary = require("cloudinary")
 exports.register = async (req,res)=>{
 
     try {
-        const newUser = await new User({...req.body})
-        const email = newUser.email
+        const file = req.files.avatar
+        const result = await cloudinary.v2.uploader.upload(file.tempFilePath,{
+            folder:'avatars',
+            width:150,
+            crop:"scale"
+        })
+        const {name,email,password} = req.body
+
+        const newUser = await new User({
+            name,email,password
+            ,avatar:{
+                public_id:result.public_id,
+                url:result.secure_url
+            }})
         const emailExist = await User.findOne({email})
-        if(emailExist) return res.status(400).json("Email already Used")
+        if(emailExist) return res.status(400).json({errors:[{msg:"Email already Used"}]})
         
         const salt = await bcrypt.genSalt(10)
         
@@ -23,7 +35,9 @@ exports.register = async (req,res)=>{
         await newUser.save()
         sendToken(newUser,200,res)
     } catch (error) {
-        res.status(400).json(error)
+        res.status(400).json({errors:[{msg:"Failed to register"}]})
+        ;
+
     }
 }
 
@@ -33,11 +47,11 @@ exports.login = async (req,res) =>{
         const {email,password} = req.body
         const user = await User.findOne({email})
 
-        if(!user) return res.status(404).json({msg:"Email doesnt exist "})
+        if(!user) return res.status(404).json({errors:{msg:"Email doesnt exist "}})
 
         const isMatch = await bcrypt.compare(password,user.password)
 
-        if(!isMatch) return res.status(404).json({msg:"Bad credentials"})
+        if(!isMatch) return res.status(404).json({errors:{msg:"Bad credentials"}})
 
         
         sendToken(user,200,res)
@@ -115,7 +129,7 @@ exports.forgotPassword = async (req,res) => {
         await user.save()
         //create reset password url
 
-        const resetUrl = `http://localhost:8000/api/password/reset/${resetToken}`
+        const resetUrl = `http://localhost:3000/password/reset/${resetToken}`
         const message = `Your password reset token ${resetUrl}`
         
         await sendEmail({
@@ -173,10 +187,28 @@ exports.updateUserProfile = async (req,res) => {
     const newUserData = {
         name:req.body.name,
         email:req.body.email,
-        role:req.body.role
+        role:req.body.role,
+    
     }
+   
     try {
+        if(req.files.avatar){
+            const user = await User.findById(req.user.id)
+            const image_id = user.avatar.public_id
+            const res = await cloudinary.v2.uploader.destroy(image_id)
+            const file = req.files.avatar
+            const result = await cloudinary.v2.uploader.upload(file.tempFilePath,{
+                folder:'avatars',
+                width:150,
+                crop:"scale"
+            })
+            newUserData.avatar = {
+                public_id:result.public_id,
+                url:result.secure_url
+            }
+        }
         const user = await User.findByIdAndUpdate(req.params.id,{$set:newUserData})
+
         res.status(200).json({msg:"updated",data: {...req.body}})
     } catch (error) {
         res.status(400).json({errors:[{msg:"error"}]})
